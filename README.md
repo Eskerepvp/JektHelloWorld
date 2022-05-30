@@ -1,9 +1,13 @@
 # JektHelloWorld
 Hello World/Examples, using the Jekt Web Framework
 
-Note, clean the <buildDir>/site folder after every build, but if you get issues do that.
+#Building
+
+To build run gradlew compile for windows, ./gradlew compile for other operating systems
+
+Note, clean the <buildDir>/site folder after every compliation, but if you get issues do that.
   
-  If the build is succsesful, you should see something like this
+  If the compliation is succsesful, you should see something like this
 
 `AMOUNT OF FILES TOUCHED: 3
 COMPILED`
