@@ -1,0 +1,168 @@
+buildscript {
+    repositories {
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://repo.spongepowered.org/maven' }
+    }
+    dependencies {
+        classpath 'com.github.i-net-software:jwebassembly-gradle:master-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+apply plugin: 'de.inetsoftware.jwebassembly'
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.spongepowered.org/maven' }
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/de.inetsoftware/jwebassembly-api
+    implementation 'com.github.i-net-software:jwebassembly-api:master-SNAPSHOT'
+    // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+
+    implementation 'com.github.Eskerepvp:Jekt:eaae79a92f'
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/java'
+
+}
+
+wasm {
+    compilerVersion = 'com.github.i-net-software:jwebassembly:master-SNAPSHOT'
+
+    debugNames = true
+}
+
+/**
+ * the custom task is temporary until i code it into the plugin itself
+ * FOR NOW. THIS. IS. REQUIRED
+ */
+
+tasks.register("compile", Copy) {
+
+
+    def indexPage = """
+        <!DOCTYPE html>
+<html>
+<head>
+    <script src="${rootProject.name}-${version}.wasm.js"></script>
+</head>
+<body>
+
+<script>
+    WebAssembly.instantiateStreaming(fetch('${rootProject.name}-${version}.wasm'), wasmImports)
+        .then(obj => obj.instance.exports.home())
+        .catch((err) => document.write(err + '<p>Missing <a href="https://github.com/i-net-software/JWebAssembly/wiki/browser">Browser Support</a>'));
+</script>
+
+</body>
+</html>
+""" // creates a dummy html page
+
+    def projDir = "${rootProject.group}".replaceAll("\\.", "/")
+    // get the project dir, and replaces the periods with slashes
+
+    dependsOn('build') // must build first
+
+    println 'COMPILING...' // prints Compiling
+
+    println "You mave have to run this twice..."
+
+    println "If that doesn't work, run it multiple times, and clean the site directory in build directory."
+
+    mkdir("$buildDir/site") // makes a folder in the build dir called site
+
+
+    mkdir("$buildDir/toBeTouched")
+    // makes a folder in the build dir called toBeTouched, this represents which files haven't been looked at by compiler
+
+    mkdir("$buildDir/touched")
+    // makes a folder in the build dir called, touched, this represents which files have been looked at by compiler
+
+    from layout.buildDirectory.dir("distributions") // copy the .wasm, .map, and .js files
+    include "*"
+    into layout.buildDirectory.file("site")
+
+
+    def filesToCopy = copySpec {
+        from "$buildDir/classes/java/main/$projDir/pages/"
+        include "*.class"
+    } // this gets the class files from pages directory
+
+    ["$buildDir/toBeTouched"/*, "$buildDir/site" */].each { dest ->
+        copy {
+            with filesToCopy
+            into dest
+        }
+    } // copy files from pages directory to toBeTouched
+
+    File dir = new File("$buildDir/toBeTouched/.")
+
+    def amountOfFiles = dir.listFiles().findAll { it.name ==~ /.*s/ }
+            .size()
+
+    File[] listOfFiles = dir.listFiles()
+
+    for (File file : listOfFiles) {
+        if (file.isFile()) {
+            println("TO BE TOUCHED: ${file.getName()}")
+        }
+    }
+
+    println "AMOUNT OF FILES TO BE TOUCHED: ${amountOfFiles}"
+
+
+    doLast {
+        /*creates a index.html file*/ new File("$buildDir/site", "index.html").text = indexPage
+        for (File file : listOfFiles) {
+            if (file.isFile()) {
+                println("TOUCHED: ${file.getName()}") // prints touched, this is done when compilation is done
+
+            }
+        }
+
+        println "AMOUNT OF FILES TOUCHED: ${amountOfFiles}"
+
+
+        for(int i=0; i<amountOfFiles; i++) {
+            for (File file : listOfFiles) {
+                if (file.isFile()) {
+                    new File("$buildDir/site", "${file.getName().replaceAll(".class", "")}.html").text = """
+        <!DOCTYPE html>
+<html>
+<head>
+    <script src="${rootProject.name}-${version}.wasm.js"></script>
+</head>
+<body>
+
+<script>
+    WebAssembly.instantiateStreaming(fetch('${rootProject.name}-${version}.wasm'), wasmImports)
+        .then(obj => obj.instance.exports.${file.getName().toLowerCase().replaceAll(".class", "")}())
+        .catch((err) => document.write(err + '<p>Missing <a href="https://github.com/i-net-software/JWebAssembly/wiki/browser">Browser Support</a>'));
+</script>
+
+</body>
+</html>
+""" //creates html files on amount of .class files there are
+
+                }
+            }
+        }
+
+        println "COMPILED"
+    }
+}
+
+def getAmountOfFiles() {
+    return amountOfFiles
+}
