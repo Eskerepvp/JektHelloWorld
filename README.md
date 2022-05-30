@@ -1,7 +1,7 @@
 # JektHelloWorld
 Hello World/Examples, using the Jekt Web Framework
 
-#Building
+# Building
 
 To build run gradlew compile for windows, ./gradlew compile for other operating systems
 
