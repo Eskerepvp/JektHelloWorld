@@ -3,8 +3,6 @@ package org.example.pages;
 import de.inetsoftware.jwebassembly.api.annotation.Export;
 
 import static com.pepperoni.jekt.Elements.*;
-import static com.pepperoni.jekt.EmbeddedJavaScript.alert;
-import static com.pepperoni.jekt.EmbeddedJavaScript.script;
 import static com.pepperoni.jekt.router.Links.Link;
 
 

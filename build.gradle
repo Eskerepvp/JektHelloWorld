@@ -29,7 +29,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
 
-    implementation 'com.github.Eskerepvp:Jekt:eaae79a92f'
+    implementation 'com.github.Eskerepvp:Jekt:v1.1'
 }
 
 sourceSets {

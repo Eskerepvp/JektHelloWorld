@@ -38,6 +38,10 @@ public class Counter {
                 "let counterMinusElem = document.getElementById(\"decreaseButton\");\n" +
                 "let counterPlusElem = document.getElementById(\"increaseButton\");\n");
 
+        /**
+         * I could implement this in java, but I don't want to and there isn't a point
+         */
+
         script("let count = 0;\n" +
                 "\n" +
                 "updateDisplay();\n" +
@@ -57,11 +61,6 @@ public class Counter {
                 "};");
 
 
-
-    }
-
-    @Export
-    public static void increaseCount() {
     }
 
 }
